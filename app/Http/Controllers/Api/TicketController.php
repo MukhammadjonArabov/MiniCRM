@@ -15,7 +15,14 @@ class TicketController extends Controller
      */
     public function index()
     {
-        //
+        $tickets = Ticket::with(['customer', 'files', 'manager'])
+            ->orderBy('created_at', 'desc')
+            ->get();
+        
+        return response()->json([
+            'status' => 'success',
+            'tickets' => $tickets
+        ]); 
     }
 
     /**
@@ -90,9 +97,21 @@ class TicketController extends Controller
     /**
      * Display the specified resource.
      */
-    public function show(Ticket $ticket)
+    public function show($id)
     {
-        //
+        $ticket = Tiket::with(['customer', 'files', 'manager'])->find($id);
+
+        if (!$ticket) {
+            return response()->json([
+                'status' => 'error',
+                'message' => 'Ticket not found'
+            ], 404);
+        }
+
+        return response()->json([
+            'status' => 'success',
+            'ticket' => $ticket
+        ]);
     }
 
     /**
