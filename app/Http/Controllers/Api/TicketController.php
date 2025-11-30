@@ -125,16 +125,69 @@ class TicketController extends Controller
     /**
      * Update the specified resource in storage.
      */
-    public function update(Request $request, Ticket $ticket)
+    public function update(Request $request, $id)
     {
-        //
+        $ticket = Ticket::find($id);
+
+        if (!$ticket) {
+            return response()->json([
+                'status' => 'error',
+                'message' => 'Ticket not found'
+            ], 404);
+        }
+
+        $validator = Validator::make($request->all(), [
+            'status' => 'required|in:new,in_progress,processed',
+            'manager_id' => 'nullable|exists:users,id',
+        ]);
+
+        $data = $validator->validated();
+
+        if (isset($data['status'])) {
+            $ticket->status = $data['status'];
+        }
+
+        if (isset($data['manager_reply'])) {
+            $ticket->manager_reply = $data['manager_reply'];
+            $ticket->manager_reply_date = now();
+            $ticket->manager_id = auth()->id(); 
+        }
+
+        $ticket->save();
+
+        return response()->json([
+            'status' => 'success',
+            'message' => 'Ticket updated successfully',
+            'ticket' => $ticket
+        ]);
     }
 
     /**
      * Remove the specified resource from storage.
      */
-    public function destroy(Ticket $ticket)
+    public function destroy($id)
     {
-        //
+        $ticket = Ticket::find($id);
+
+        if (!$ticket) {
+            return response()->json([
+                'status' => 'error',
+                'message' => 'Ticket not found'
+            ], 404);
+        }
+        
+        foreach ($ticket->files as $file) {
+            if (\Storage::exists($file->file_path)) {
+                \Storage::delete($file->file_path);
+            }
+        }
+
+        $ticket->delete();
+
+        return response()->json([
+            'status' => 'success',
+            'message' => 'Ticket deleted successfully'
+        ]);
     }
 }
+

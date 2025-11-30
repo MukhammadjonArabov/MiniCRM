@@ -12,3 +12,9 @@ Route::middleware(['auth:sanctum', 'role:manager,admin', 'permission:ticket.view
 
 Route::middleware(['auth:sanctum', 'role:manager,admin', 'permission:ticket.view'])
     ->get('/tickets/{id}', [TicketController::class, 'show']);    
+
+Route::middleware(['auth:sanctum', 'role:manager,admin', 'permission:ticket.update'])
+    ->match(['put', 'patch'], '/tickets/{id}', [TicketController::class, 'update']);  
+    
+Route::middleware(['auth:sanctum', 'role:manager,admin', 'permission:ticket.delete'])
+    ->delete('/tickets/{id}', [TicketController::class, 'destroy']);    
