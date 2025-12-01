@@ -22,3 +22,7 @@ class CheckPermission
         return $next($request);
     }
 }
+
+
+
+//App/Http/Middleware/ChackPermission.php 
